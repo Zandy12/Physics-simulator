@@ -1,0 +1,959 @@
+<!-- 
+This program served as a learning exercise for me in both Computer Science and Mathematics. Originally, it started out as a project to help me better understand C++ and to create algorithms that can simulate a bouncing ball. The project eventually expanded into now I would like to call a "Physics simulator" that can simulate basic physics implemented on balls that can be fully interacted with via user mouse input. While the algorithms were written in Javascript, the display was done using HTML/CSS graphics. Because of this, I had come across some witnessed limitations. Fortunately, I was able to achieve fair results with the project. This was done deliberately by choice and I enjoyed the challenge of trying to use CSS as a graphics engine instead of a WebGL alternative. The project attempts to simulate 4 different types of ball movement: basic movement, bouncing, orbiting, and being shot out of a cannon. Provided in the code are comments for which certain blocks of code do. There are some bugs in the program (i.e increased sizes of bouncing ball overflow on borders), however none should cause the entire program to break. Therefore it should be pretty stable. Enjoy! :D
+
+/*****************************************************************************
+
+MIT License
+
+Copyright (c) 2019 Zane Chandy
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+*****************************************************************************/
+
+Portfolio:
+GitHub: https://github.com/Zandy12
+Stack Overflow: https://stackoverflow.com/users/11323258/zane-c
+
+Resume:
+LinkedIn: https://www.linkedin.com/in/zane-chandy-03ba56160/
+
+Conact:
+Website: https://www.zaneswackyblog.com
+Email:  zanechandy@gmail.com
+Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
+-->
+
+<!doctype html>
+<html>
+    <head>
+        <title>Zane's Physics Simulator</title>
+        <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+        <meta content="utf-8" http-equiv="encoding">
+        <style type="text/css">
+        body {
+            /* background-image: url("gridBox.png"); */
+            background-repeat: no-repeat;
+            background-position: 8 8;
+        }
+        .Box {
+            width: 751px; 
+            height: 500px; 
+            border: 1px solid black;
+        } 
+        .Ball {
+            background-color: black;
+            width: 16px; 
+            height: 16px; 
+            margin-left: 358px;
+            margin-top: 232px;
+            border-radius: 50%;
+        }
+        .pauseMenu {
+            background-color: black;
+        }
+        .classToSplit {
+            clear: both;
+            display: block;
+        }
+        .topDisplay {
+            float:  left;
+        }
+        /* select#options {
+            margin-left: 150px;
+            margin-top: 200px;
+        } */
+        .rightDisplay {
+            padding-left: 150px;
+            padding-top: 200px;
+            margin-right: 500px;
+            margin-left: 725px;
+        }
+        .sliderDisplay {
+            margin-top: 10px;
+        }
+    </style>
+    </head>
+    <body>
+        <div class="classToSplit">
+            <div class="topDisplay">
+                <div class="Box">
+                    <div class="Ball">
+                    </div>
+                </div>
+                <p id="frames">Frames: </p>
+                <p id="seconds">Seconds:</p>
+                <p id="frameRate">Framerate: </p>
+                <p id="coordinates">Coordinates: </p>
+                <p id="screenCoords">Mouse coordinates: (0, 0)</p>
+                <p id="ballSpeed">Ballspeed: </p>
+                <p id="directions">Directions: Select any of the 4 choices to begin.</p>
+            </div>
+            <div class="rightDisplay">
+                <div>
+                    <select id="options" size="4">
+                        <option value="basic" selected>Basic</option>
+                        <option value="implementPhysics" >Implement Physics</option>
+                        <option value="solarSystem" >Solar System</option>
+                        <option value="ballSpitter" >Ball Spitter</option>
+                    </select>
+                </div>
+                <div class="sliderDisplay">
+                    <label id="speed">Frame Rate: </label>
+                    <input type="range" min="15" max="300" value="150" class="slider" id="myRange">
+                </div>
+            </div>
+        </div>
+        <script>
+            /******************
+                 Variables     
+            *******************/
+
+            // getters and setters 
+            const topDisplay = document.querySelector("div.topDisplay");
+            const rightDisplay = document.querySelector("div.rightDisplay");
+            const box = document.querySelector("div.Box");
+            const ball = document.querySelector("div.Ball");
+            const frames = document.getElementById("frames");
+            const frameRate = document.getElementById("frameRate");
+            const coordinates = document.getElementById("coordinates");
+            const staticBallSpeed = document.getElementById("ballSpeed");
+            const seconds = document.getElementById("seconds");
+            const options = document.getElementById("options");
+            const ballSpeed = document.createElement('p');
+            const cannonBox = document.createElement('div');
+            const cannonBarrel = document.createElement('div');
+            const myRange = document.getElementById('myRange');
+            const speed = document.getElementById('speed');
+            const ballSize = document.createElement('div');
+            const ballSizeLabel = document.createElement('label');
+            const ballSizeText = document.createTextNode('Ball Size (pixels): ');
+            const ballSizeInput = document.createElement('input');
+            const directions = document.getElementById('directions');
+
+            // booleans
+            let gamePaused = false;
+            let velExists = false;
+            let staticExists = false;
+            let ballSpeedExists = false;
+            let planetsExist = false;
+            let cannonBoxExists = false;
+            let ballExists = false;
+            let sizeSlider = false;
+            let directionsExist = true;
+
+            // uninitialized globals
+            let ballX;
+            let ballY;
+            let ballSpeedX;
+            let ballSpeedY;
+            let vel;
+            let planetOneCoords;
+            let planetTwoCoords;
+            let planetThreeCoords;
+            let truexpos;
+            let trueypos;
+
+            // initialized globals 
+            let framesDisplayed = 0;
+            let coordinatesDisplayed = 0;
+            let ballSpeedDisplayed = 0;
+            let secondsCounted = 0;
+            let count = null;
+            let firstInterval = null;
+            let secondInterval = null;
+
+            /*******************
+                  Functions     
+            ********************/
+
+            // find mouse coordinates 
+            function findScreenCoords(mouseEvent) {
+                let xpos;
+                let ypos;
+                if (mouseEvent) {
+                    //FireFox
+                    xpos = mouseEvent.screenX;
+                    ypos = mouseEvent.screenY;
+                } else {
+                    //IE
+                    xpos = window.event.screenX;
+                    ypos = window.event.screenY;
+                }
+                truexpos = xpos-16;
+                trueypos = ypos-86;
+                document.getElementById("screenCoords").innerHTML = "Mouse coordinates: (" + truexpos + ", " + trueypos + ")";
+            }
+
+            // clears DOM of previously used elements and resets original elements and values 
+            function clearClearClear() {
+                // reset ball
+                if (!ballExists) {
+                    window.ball = document.createElement('div');
+                    ball.className = 'Ball';
+                    ball.style.backgroundColor = 'black';
+                    ball.style.width = '16px'; 
+                    ball.style.height = '16px'; 
+                    ball.style.marginLeft = '358px';
+                    ball.style.marginTop = '232px';
+                    ball.style.borderRadius = '50%';
+                    box.appendChild(ball);
+                    ballExists = true;
+                }        
+                // clear previous intervals     
+                clearInterval(firstInterval);
+                clearInterval(secondInterval);
+                clearInterval(count);
+                // reset boolean values and respective elements
+                if (!staticExists) {
+                    staticBallSpeed.parentElement.removeChild(staticBallSpeed);
+                    staticExists = true;
+                }
+                if (ballSpeedExists) {
+                    ballSpeed.parentElement.removeChild(ballSpeed);
+                    ballSpeedExists = false; 
+                }
+                if (velExists) {
+                    vel.parentElement.removeChild(vel);
+                    velExists = false; 
+                }
+                if (sizeSlider) {
+                    ballSize.parentElement.removeChild(ballSize);
+                    sizeSlider = false;
+                }
+                // reposition ball 
+                if (ballExists) {
+                    ball.style.width = 16 + "px";
+                    ball.style.height = 16 + "px";
+                    ball.style.marginLeft = 358 + "px";
+                    ball.style.marginTop = 232 + "px"; 
+                }
+                // remove planets 
+                if (planetsExist) {
+                    planetOne.parentElement.removeChild(planetOne);
+                    planetOneCoords.parentElement.removeChild(planetOneCoords);
+                    planetTwo.parentElement.removeChild(planetTwo);
+                    planetTwoCoords.parentElement.removeChild(planetTwoCoords);
+                    planetThree.parentElement.removeChild(planetThree);
+                    planetThreeCoords.parentElement.removeChild(planetThreeCoords);
+                    coordinates.style.display = 'block';
+                    ballSpeed.style.display = 'block';
+                    planetsExist = false;
+                }
+                // remove cannon
+                if (cannonBoxExists) {
+                    cannonBox.parentElement.removeChild(cannonBox);
+                    cannonBarrel.parentElement.removeChild(cannonBarrel);
+                    cannonBoxExists = false;
+                }
+            }
+
+            // create element for velocity output diplay
+            function createVel() {
+                vel = document.createElement("p");
+                let velText = document.createTextNode("Velocity: ");
+                vel.appendChild(velText);   
+                topDisplay.appendChild(vel);
+                velExists = true;            
+            }
+
+            // sets planet attributes
+            function planetStyleEditor(planet, color, marginLeft, marginTop) {
+                planet.style.backgroundColor = color;
+                planet.style.width = '16px';
+                planet.style.height = '16px';
+                planet.style.marginLeft = marginLeft;
+                planet.style.marginTop = marginTop;
+                planet.style.borderRadius = '50%';
+            }
+
+            // create planets when solar system is selected
+            function createPlanets() {
+                const planetOne = document.createElement('div');
+                planetOne.id = 'planetOne';
+                box.appendChild(planetOne);
+                planetStyleEditor(planetOne, 'red', '358px', '36px'); 
+                planetOneCoords = document.createElement("p");
+                let planetOneCoordsText = document.createTextNode("Planet One Coordinates: ");
+                planetOneCoords.appendChild(planetOneCoordsText);   
+                topDisplay.appendChild(planetOneCoords);
+                const planetTwo = document.createElement('div');
+                planetTwo.id = 'planetTwo';
+                box.appendChild(planetTwo);
+                planetStyleEditor(planetTwo, 'blue', '358px', '36px');
+                planetTwoCoords = document.createElement("p");
+                let planetTwoCoordsText = document.createTextNode("Planet Two Coordinates: ");
+                planetTwoCoords.appendChild(planetTwoCoordsText);   
+                topDisplay.appendChild(planetTwoCoords);
+                const planetThree = document.createElement('div');
+                planetThree.id = 'planetThree';
+                box.appendChild(planetThree);
+                planetStyleEditor(planetThree, 'green', '358px', '52px');
+                planetThreeCoords = document.createElement("p");
+                let planetThreeCoordsText = document.createTextNode("Planet Three Coordinates: ");
+                planetThreeCoords.appendChild(planetThreeCoordsText);   
+                topDisplay.appendChild(planetThreeCoords);
+                coordinates.style.display = 'none';
+                ballSpeed.style.display = 'none';
+            }
+
+            /********************
+                   Program      
+            *********************/
+
+            // set frame rate slider to default value
+            myRange.value = 150;
+            window.frameRateDisplayed = myRange.value;
+            speed.innerHTML = "Frame Rate: " + (window.frameRateDisplayed);
+
+            // find mouse coordinates in beginning of program
+            box.onmousemove = findScreenCoords;
+
+            options.addEventListener('click', (e) => {
+                    // Basic
+                    if ("clicked" && options.value === "basic") { 
+                        // clear the DOM
+                        clearClearClear();
+                        if (ballSpeedExists === false) {
+                            topDisplay.appendChild(ballSpeed);
+                            ballSpeedExists = true;
+                        }
+                        // add directions 
+                        if (directionsExist) {
+                            let globalDirections = directions;
+                            globalDirections.parentElement.removeChild(globalDirections);
+                            directionsExist = false;
+                        } else if (!directionsExist) {
+                            let directions = window.directions;
+                            directions.parentElement.removeChild(directions);
+                        }
+                        window.directions = document.createElement('p');
+                        const directionsText = document.createTextNode('Directions: N/A');
+                        window.directions.appendChild(directionsText);
+                        topDisplay.appendChild(window.directions);
+                        // initialize global variables
+                        ballX = 3;
+                        ballY = 3;
+                        ballSpeedX = 1;
+                        ballSpeedY = 2;
+                        framesDisplayed = 0;
+                        secondsCounted = 0;
+                        ballSpeed.innerHTML = "Ballspeed: (" + 0 + ", " + 0 + ")";
+                        // create interval for loop
+                        count = setInterval( function() { secondsCounted++; }, 1000);
+                        // code for pause functionality 
+                        firstInterval = setInterval( function() {
+                            document.addEventListener("keypress", function(event) {
+                                    if (event.keyCode === 112 && gamePaused === false) {
+                                        gamePaused = true;
+                                    } 
+                                    else if (event.keyCode === 112 && gamePaused === true) {
+                                        gamePaused = false;
+                                    }
+                            });
+                            // loop starts here 
+                            if (!gamePaused) {
+                                window.frameRateDisplayed = myRange.value;
+                                speed.innerHTML = "Frame Rate: " + (window.frameRateDisplayed);
+                                ball.style.marginLeft = ballX + "px";
+                                ball.style.marginTop = ballY + "px";
+                                if (ballY > 484) {
+                                    ballSpeedY *= -1;
+                                }
+                                if (ballY < 3) {
+                                    ballSpeedY *= -1;
+                                }
+                                if (ballX > 735) {
+                                    ballSpeedX *= -1;
+                                }
+                                if (ballX < 3) {
+                                    ballSpeedX *= -1;
+                                }
+                                // change html attributes for output display 
+                                frames.innerHTML = "Frames: " + framesDisplayed;
+                                frameRate.innerHTML = "Framerate: " + Math.round(framesDisplayed/secondsCounted);
+                                coordinates.innerHTML = "Coordinates: (" + Math.round(ballX) + ", " + Math.round(ballY) + ")";
+                                ballSpeed.innerHTML = "Ballspeed: (" + Math.round(ballSpeedX) + ", " + Math.round(ballSpeedY) + ")";
+                                seconds.innerHTML = "Seconds: " + secondsCounted;
+                                // function for repositioning ball via mouse click
+                                box.onmousemove = findScreenCoords;
+                                /* box.addEventListener('mousedown', (e) => {
+                                    mouseIsDown = true;
+                                    setInterval(function() {
+                                        if(mouseIsDown) {
+                                            ballX = truexpos;
+                                            ballY = trueypos;
+                                        }
+                                        if (ballSpeedY === -2) {
+                                            ballSpeedY = 2;
+                                        }
+                                    }, 1000/window.frameRateDisplayed);
+                                });
+                                window.addEventListener('mouseup', function() {
+                                    mouseIsDown = false;
+                                }); */
+                                ballX += ballSpeedX;
+                                ballY += ballSpeedY;
+                                framesDisplayed++;
+                            }
+                        }, 1000/window.frameRateDisplayed);
+                    }
+                    // Implement Physics
+                    if ("clicked" && options.value === "implementPhysics") { 
+                        // clear the DOM
+                        clearClearClear();
+                        // create velocity element 
+                        if (!velExists) {
+                            createVel();
+                        } 
+                        if (!sizeSlider) {
+                            // Create elements for size slider for bouncing ball
+                            ballSizeLabel.appendChild(ballSizeText);
+                            ballSizeInput.type = 'range';
+                            ballSizeInput.min = '16';
+                            ballSizeInput.max = '60';
+                            ballSizeInput.value = '16';
+                            ballSize.appendChild(ballSizeLabel);
+                            ballSize.appendChild(ballSizeInput);
+                            rightDisplay.appendChild(ballSize);
+                            sizeSlider = true;
+                        }
+                        // add directions 
+                        if (directionsExist) {
+                            let globalDirections = directions;
+                            globalDirections.parentElement.removeChild(globalDirections);
+                            directionsExist = false;
+                        } else if (!directionsExist) {
+                            let directions = window.directions;
+                            directions.parentElement.removeChild(directions);
+                        }
+                        window.directions = document.createElement('p');
+                        const directionsText = document.createTextNode('Directions: Click and drag the bouncing ball to interact with it.');
+                        window.directions.appendChild(directionsText);
+                        topDisplay.appendChild(window.directions);
+                        // reinitialize global variables
+                        framesDisplayed = 0;
+                        secondsCounted = 0;
+                        ballX = 358;
+                        ballY = 232;
+                        ballSpeedY = 0;
+                        ballSpeedX = 0;
+                        let mass = 1;
+                        // create interval for loop
+                        count = setInterval( function() { secondsCounted++; }, 1000);
+                        // code for pause functionality
+                        secondInterval = setInterval( function() {
+                            document.addEventListener("keypress", function(event) {
+                                    if (event.keyCode === 112 && gamePaused === false) {
+                                        gamePaused = true;
+                                    }
+                                    else if (event.keyCode === 112 && gamePaused === true) {
+                                        gamePaused = false;
+                                    }
+                            });
+                            // loop starts here
+                            if (!gamePaused) {
+                                window.frameRateDisplayed = myRange.value;
+                                window.currentBallSize = ballSizeInput.value;
+                                speed.innerHTML = "Frame Rate: " + (window.frameRateDisplayed);
+                                ballSizeLabel.innerHTML = "Ball Size (pixels): " + (window.currentBallSize);
+                                ball.style.width = window.currentBallSize + "px";
+                                ball.style.height = window.currentBallSize + "px";
+                                ball.style.marginLeft = ballX + "px";
+                                ball.style.marginTop = ballY + "px";
+
+                                /* algorithm for changing velocity increments to accomodate for mass */
+
+                                // condtions for X-axis movement
+                                if (ballX > 3 || ballX < 735) {
+                                    if (ballSpeedX/-ballSpeedX === 1) {
+                                        ballX -= ballSpeedX;
+                                    } else {
+                                        ballX += ballSpeedX;
+                                    }
+                                }
+                                if (ballX < 3 && ballSpeedX < 0) {
+                                    ballSpeedX *= -1;
+                                    ballSpeedX -= mass;
+                                }
+                                if (ballX < 1 && ballSpeedX < -6) {
+                                    ballSpeedX *= -1;
+                                    ballSpeedX -= mass;
+                                }
+                                if (ballX < -29 && ballSpeedX >= -6) {
+                                    ballSpeedX *= -1;
+                                    ballSpeedX -= mass;
+                                }
+                                if (ballX > 735 && ballSpeedX > 0) {
+                                    ballSpeedX *= -1;
+                                    ballSpeedX += mass;
+                                }
+                                if (ballX > 737 && ballSpeedX > 6) {
+                                    ballSpeedX *= -1;
+                                    ballSpeedX += mass;
+                                }
+                                if (ballX > 767 && ballSpeedX <= 6) {
+                                    ballSpeedX *= -1;
+                                    ballSpeedX += mass;
+                                }
+                                // conditions for Y-axis movement
+                                if (ballY < 486 && ballSpeedY > -6) {
+                                    ballSpeedY += mass;
+                                    ballY += ballSpeedY;
+                                }
+                                if (ballY < 516 && ballSpeedY <= -6) {
+                                    ballSpeedY += mass;
+                                    ballY += ballSpeedY;                                   
+                                }
+                                if (ballY > 484 && ballSpeedY > 0) {
+                                    ballSpeedY *= -1;
+                                }
+                                if (ballY < 3 && ballSpeedY > 0) {
+                                    ballSpeedY *= -1;                               
+                                }
+                                if (ballY < -29 && ballSpeedY >= 6) {
+                                    ballSpeedY *= -1; 
+                                    ballSpeedY += mass;                                
+                                }
+                                if (ballY < 1 && ballSpeedY < 6) {
+                                    ballSpeedY *= -1;
+                                    ballSpeedY += mass;
+                                } 
+                                // change html attributes for output display 
+                                frames.innerHTML = "Frames: " + framesDisplayed;
+                                frameRate.innerHTML = "Framerate: " + Math.round(framesDisplayed/secondsCounted); 
+                                coordinates.innerHTML = "Coordinates: (" + Math.round(ballX) + ", " + Math.round(ballY) + ")";
+                                seconds.innerHTML = "Seconds: " + secondsCounted;
+                                vel.innerHTML = "Velocity: (" + ballSpeedX + ", " + ballSpeedY + ")";
+                                // function for repositioning ball and changing its velocity via clicking and dragging the mouse
+                                box.onmousemove = findScreenCoords;
+                                box.addEventListener('mousedown', (e) => {
+                                    let coordArrayX = [];
+                                    let coordArrayY = [];
+                                    mouseIsDown = true;
+                                    setInterval(function() {
+                                        if(mouseIsDown) {
+                                            ballX = truexpos;
+                                            ballY = trueypos;
+                                            ballSpeedY = 0;
+                                            coordArrayX.push(truexpos);
+                                            coordArrayY.push(trueypos);
+                                            if (coordArrayX.length === 10 || coordArrayY.length === 5) {
+                                                let xOne = coordArrayX[0];
+                                                let xTwo = coordArrayX[coordArrayX.length-1];
+                                                ballSpeedX = Math.round((xTwo - xOne)/16);
+                                                let yOne = coordArrayY[0];
+                                                let yTwo = coordArrayY[coordArrayY.length-1];
+                                                ballSpeedY = Math.abs(Math.round((yTwo - yOne)/16));
+                                                coordArrayX = [];
+                                                coordArrayY = [];
+                                            }
+                                        }
+                                    }, 1000/window.frameRateDisplayed);
+                                });
+                                window.addEventListener('mouseup', function() {
+                                    mouseIsDown = false;
+                                });
+                                framesDisplayed++;
+                            }
+                        }, 1000/window.frameRateDisplayed);
+                    }
+                    // Solar System
+                    if ("clicked" && options.value === "solarSystem") { 
+                        // clear the DOM
+                        clearClearClear();
+                        if (!ballSpeedExists) {
+                            topDisplay.appendChild(ballSpeed);
+                            ballSpeedExists = true;
+                        }        
+                        // reinitialize globals and call createPlanets function
+                        ballX = 358;
+                        ballY = 232;
+                        createPlanets();
+                        planetsExist = true;
+                        // remove directions
+                        if (directionsExist) {
+                            let globalDirections = directions;
+                            globalDirections.parentElement.removeChild(globalDirections);
+                            directionsExist = false;
+                        } else if (!directionsExist) {
+                            let directions = window.directions;
+                            directions.parentElement.removeChild(directions);
+                            directionsExist = false;
+                        }  
+                        window.directions = document.createElement('p');
+                        const directionsText = document.createTextNode('Directions: N/A');
+                        window.directions.appendChild(directionsText);
+                        topDisplay.appendChild(window.directions);                                 
+                        ballSpeedX = 0;
+                        ballSpeedY = 0;
+                        let planetOneX; // 358
+                        let planetOneY; // 36
+                        let planetTwoX; // 308
+                        let planetTwoY; // 74
+                        let planetThreeX;
+                        let planetThreeY;
+                        let theta = Math.PI/2;
+                        let beta = 2*Math.PI/3;
+                        let alpha = 0.01745329252;
+                        // function for planetOne orbit parameters
+                        function planetOneOrbitParam(radius) {
+                            if (theta < 0.01745329252) {
+                                theta = 2*Math.PI;
+                            }
+                            theta -= 0.01745329252;
+                            planetOneX = radius*Math.cos(theta)+358;
+                            planetOneY = radius*Math.sin(theta)-17;
+                            planetOne.style.marginLeft = planetOneX + "px";
+                            planetOne.style.marginTop = planetOneY + "px";
+                        } 
+                        // function for planetTwo orbit parameters
+                        function planetTwoOrbitParam(radius) {
+                            if (beta < 0.01745329252) {
+                                beta = 2*Math.PI;
+                            }
+                            beta -= 0.01745329252;
+                            planetTwoX = radius*Math.cos(beta)+358;
+                            planetTwoY = radius*Math.sin(beta)-17;          
+                            planetTwo.style.marginLeft = planetTwoX + "px";
+                            planetTwo.style.marginTop = planetTwoY + "px";
+                        }
+                        // function for planetThree orbit parameters
+                        function planetThreeOrbitParam(radius) {
+                            if (alpha < 0.01745329252) {
+                                alpha = 2*Math.PI;
+                            }
+                            alpha -= 0.01745329252;
+                            planetThreeX = radius*Math.cos(alpha)+358;
+                            planetThreeY = radius*Math.sin(alpha)-17;          
+                            planetThree.style.marginLeft = planetThreeX + "px";
+                            planetThree.style.marginTop = planetThreeY + "px";
+                        }
+                        framesDisplayed = 0;
+                        secondsCounted = 0;
+                        ballSpeed.innerHTML = "Ballspeed: (" + 0 + ", " + 0 + ")";
+                        // create interval for loop
+                        count = setInterval( function() { secondsCounted++; }, 1000);
+                        // code for pause functionality 
+                        firstInterval = setInterval( function() {
+                            document.addEventListener("keypress", function(event) {
+                                    if (event.keyCode === 112 && gamePaused === false) {
+                                        gamePaused = true;
+                                    } 
+                                    else if (event.keyCode === 112 && gamePaused === true) {
+                                        gamePaused = false;
+                                    }
+                            });
+                            // loop starts here
+                            if (!gamePaused) {
+                                window.frameRateDisplayed = myRange.value;
+                                speed.innerHTML = "Frame Rate: " + (window.frameRateDisplayed);
+                                planetOneOrbitParam(52);  // planetOne, planetOneX, planetOneY, 52, 410, 306, -16
+                                planetTwoOrbitParam(104); // radius   
+                                planetThreeOrbitParam(130);               
+                                // change html attributes for output display 
+                                frames.innerHTML = "Frames: " + framesDisplayed;
+                                frameRate.innerHTML = "Framerate: " + Math.round(framesDisplayed/secondsCounted);
+                                planetOneCoords.innerHTML = "Planet One Coordinates: (" + Math.round(planetOneX) + ", " + Math.round(planetOneY) + ")";
+                                planetTwoCoords.innerHTML = "Planet Two Coordinates: (" + Math.round(planetTwoX) + ", " + Math.round(planetTwoY) + ")";
+                                planetThreeCoords.innerHTML = "Planet Three Coordinates: (" + Math.round(planetThreeX) + ", " + Math.round(planetThreeY) + ")";
+                                seconds.innerHTML = "Seconds: " + secondsCounted;
+                                box.onmousemove = findScreenCoords;
+                                framesDisplayed++;
+                            }
+                        }, 1000/window.frameRateDisplayed);
+                    }
+                    // Ball Spitter
+                    if ("clicked" && options.value === "ballSpitter") {
+                        // clear the DOM
+                        clearClearClear();
+                        if (ballExists) {
+                            ball.parentElement.removeChild(ball);
+                            ballExists = false;
+                        } 
+                        if (!velExists) {
+                            createVel();
+                            velExists = true;
+                        } 
+                        if (!cannonBoxExists) {
+                            topDisplay.appendChild(cannonBox);
+                            cannonBox.style.width = '23px';
+                            cannonBox.style.height = '23px';
+                            cannonBox.style.marginTop = '-242px';
+                            cannonBox.style.marginLeft = '2px';
+                            cannonBox.style.backgroundColor = 'black';
+                            topDisplay.appendChild(cannonBarrel);
+                            cannonBarrel.style.backgroundColor = 'black';
+                            cannonBarrel.style.marginTop = '-35px';
+                            cannonBarrel.style.width = '46px';
+                            cannonBarrel.style.height = '17px';
+                            cannonBarrel.style.transform = 'rotate(-45deg)';
+                            cannonBoxExists = true;
+                        }
+                        // add directions 
+                        if (directionsExist) {
+                            let globalDirections = directions;
+                            globalDirections.parentElement.removeChild(globalDirections);
+                            directionsExist = false;
+                        } else if (!directionsExist) {
+                            let directions = window.directions;
+                            directions.parentElement.removeChild(directions);
+                        }
+                        window.directions = document.createElement('p');
+                        const directionsText = document.createTextNode('Directions: Change direction of cannon (\'S\' for up, \'W\' for down), and press \'Space\' to shoot.');
+                        window.directions.appendChild(directionsText);
+                        topDisplay.appendChild(window.directions);
+                        // reinitialize globals
+                        framesDisplayed = 0;
+                        secondsCounted = 0;
+                        let mass = 1;
+                        let theta  = -45;
+                        let secondsExisted;
+                        let ballSpeedX;
+                        let ballSpeedY;
+                        let ballY;
+                        let ballX;
+                        // set local to global 
+                        window.ball;
+                        // create interval for loop
+                        count = setInterval( function() { secondsCounted++; }, 1000);
+                        // code for pause functionality
+                        secondInterval = setInterval( function() {
+                            document.addEventListener("keypress", function(event) {
+                                    if (event.keyCode === 112 && gamePaused === false) {
+                                        gamePaused = true;
+                                    }
+                                    else if (event.keyCode === 112 && gamePaused === true) {
+                                        gamePaused = false;
+                                    }
+                            });
+                            // loop starts here
+                            if (!gamePaused) {
+                                window.frameRateDisplayed = myRange.value;
+                                speed.innerHTML = "Frame Rate: " + (window.frameRateDisplayed);
+                                // allow user to change direction of cannon barrel and to fire via keyboard controls
+                                document.addEventListener('keypress', (e) => {
+                                    // when 'W' key is pressed
+                                    if (e.keyCode === 119) {
+                                        theta += 0.01745329252;
+                                        if (theta <= 14.603 && theta >= -105.301) {
+                                            cannonBarrel.style.transform = 'rotate(' + theta + 'deg)';
+                                        }
+                                    }
+                                    // when 'S' key is pressed
+                                    if (e.keyCode === 115) {
+                                        theta -= 0.01745329252;
+                                        if (theta <= 14.603 && theta >= -105.301) {
+                                            cannonBarrel.style.transform = 'rotate(' + theta + 'deg)';
+                                        }
+                                    }
+                                    // when 'SpaceBar' is pressed
+                                    if (e.keyCode === 32) {
+                                        if (!ballExists) {
+                                            window.ball = document.createElement('div');
+                                            box.appendChild(window.ball);
+                                            window.ball.style.backgroundColor = 'black';
+                                            window.ball.style.width = '16px'; 
+                                            window.ball.style.height = '16px'; 
+                                            window.ball.style.borderRadius = '50%';
+                                            secondsExisted = secondsCounted+5;
+                                            ballExists = true;
+                                        }
+                                        // several if conditions for ball accuracy
+                                        if (theta >= -105.301 && theta <= -94.401) {
+                                            ballX = 12;
+                                            ballY = 447;
+                                            window.ball.style.marginLeft = ballX + 'px';
+                                            window.ball.style.marginTop = ballY + 'px';
+                                            ballSpeedX = -10;
+                                            ballSpeedY = -30;
+                                        }
+                                        if (theta >= -94.401 && theta <= -83.501) {
+                                            ballX = 16;
+                                            ballY = 447;  
+                                            window.ball.style.marginLeft = ballX + 'px';
+                                            window.ball.style.marginTop = ballY + 'px'; 
+                                            ballSpeedX = 0;
+                                            ballSpeedY = -30;                                         
+                                        }
+                                        if (theta >= -83.501 && theta <= -72.601) {
+                                            ballX = 18;
+                                            ballY = 447;
+                                            window.ball.style.marginLeft = ballX + 'px';
+                                            window.ball.style.marginTop = ballY + 'px';
+                                            ballSpeedX = 10;
+                                            ballSpeedY = -30;
+                                        }
+                                        if (theta >= -72.601 && theta <= -61.701) {
+                                            ballX = 23;
+                                            ballY = 448;
+                                            window.ball.style.marginLeft = ballX + 'px';
+                                            window.ball.style.marginTop = ballY + 'px';
+                                            ballSpeedX = 15;
+                                            ballSpeedY = -30;
+                                        }
+                                        if (theta >= -61.701 && theta <= -50.801) {
+                                            ballX = 26;
+                                            ballY = 450;
+                                            window.ball.style.marginLeft = ballX + 'px';
+                                            window.ball.style.marginTop = ballY + 'px';
+                                            ballSpeedX = 20;
+                                            ballSpeedY = -25;
+                                        }
+                                        if (theta >= -50.801 && theta <= -39.901) {
+                                            ballX = 31;
+                                            ballY = 452;
+                                            window.ball.style.marginLeft = ballX + 'px';
+                                            window.ball.style.marginTop = ballY + 'px';
+                                            ballSpeedX = 25;
+                                            ballSpeedY = -25;
+                                        }
+                                        if (theta >= -39.901 && theta <= -29.001) {
+                                            ballX = 33;
+                                            ballY = 455;
+                                            window.ball.style.marginLeft = ballX + 'px';
+                                            window.ball.style.marginTop = ballY + 'px';
+                                            ballSpeedX = 25;
+                                            ballSpeedY = -20;
+                                        }
+                                        if (theta >= -29.001 && theta <= -18.101) {
+                                            ballX = 35;
+                                            ballY = 458;
+                                            window.ball.style.marginLeft = ballX + 'px';
+                                            window.ball.style.marginTop = ballY + 'px';
+                                            ballSpeedX = 30;
+                                            ballSpeedY = -15;
+                                        }
+                                        if (theta >= -18.101 && theta <= -7.201) {
+                                            ballX = 37;
+                                            ballY = 462;
+                                            window.ball.style.marginLeft = ballX + 'px';
+                                            window.ball.style.marginTop = ballY + 'px';
+                                            ballSpeedX = 35;
+                                            ballSpeedY = -10;
+                                        }
+                                        if (theta >= -7.201 && theta <= 3.699) {
+                                            ballX = 39;
+                                            ballY = 469;
+                                            window.ball.style.marginLeft = ballX + 'px';
+                                            window.ball.style.marginTop = ballY + 'px';
+                                            ballSpeedX = 30;
+                                            ballSpeedY = -5;
+                                        }
+                                        if (theta >= 3.699 && theta <= 14.599) {
+                                            ballX = 38;
+                                            ballY = 472;
+                                            window.ball.style.marginLeft = ballX + 'px';
+                                            window.ball.style.marginTop = ballY + 'px';
+                                            ballSpeedX = 30;
+                                            ballSpeedY = 5;
+                                        }
+                                    }
+                                });
+                                // update ball position 
+                                if (ballExists) {
+                                    window.ball.style.marginLeft = ballX + "px";
+                                    window.ball.style.marginTop = ballY + "px";
+                                }
+
+                                /* algorithm for changing velocity increments to accomodate for mass */
+
+                                // change velocity increments to accomodate for mass
+                                if (ballX > 3 || ballX < 735) {
+                                    if (ballSpeedX/-ballSpeedX === 1) {
+                                        ballX -= ballSpeedX;
+                                    } else {
+                                        ballX += ballSpeedX;
+                                    }
+                                }
+                                if (ballX < 3 && ballSpeedX < 0) {
+                                    ballSpeedX *= -1;
+                                    ballSpeedX -= mass;
+                                }
+                                if (ballX < 1 && ballSpeedX < -6) {
+                                    ballSpeedX *= -1;
+                                    ballSpeedX -= mass;
+                                }
+                                if (ballX < -29 && ballSpeedX >= -6) {
+                                    ballSpeedX *= -1;
+                                    ballSpeedX -= mass;
+                                }
+                                if (ballX > 735 && ballSpeedX > 0) {
+                                    ballSpeedX *= -1;
+                                    ballSpeedX += mass;
+                                }
+                                if (ballX > 737 && ballSpeedX > 6) {
+                                    ballSpeedX *= -1;
+                                    ballSpeedX += mass;
+                                }
+                                if (ballX > 767 && ballSpeedX <= 6) {
+                                    ballSpeedX *= -1;
+                                    ballSpeedX += mass;
+                                }
+                                // conditions for Y-axis movement
+                                if (ballY < 486 && ballSpeedY > -6) {
+                                    ballSpeedY += mass;
+                                    ballY += ballSpeedY;
+                                }
+                                if (ballY < 516 && ballSpeedY <= -6) {
+                                    ballSpeedY += mass;
+                                    ballY += ballSpeedY;                                   
+                                }
+                                if (ballY > 484 && ballSpeedY > 0) {
+                                    ballSpeedY *= -1;
+                                }
+                                if (ballY < 3 && ballSpeedY > 0) {
+                                    ballSpeedY *= -1;                               
+                                }
+                                if (ballY < -29 && ballSpeedY >= 6) {
+                                    ballSpeedY *= -1; 
+                                    ballSpeedY += mass;                                
+                                }
+                                if (ballY < 1 && ballSpeedY < 6) {
+                                    ballSpeedY *= -1;
+                                    ballSpeedY += mass;
+                                }
+                                // check if ball existed more than 5 seconds
+                                if (secondsExisted < secondsCounted) {
+                                    if (ballExists) {
+                                        window.ball.parentElement.removeChild(window.ball);
+                                        ballExists = false;
+                                        // reinitialize ball attributes
+                                        ballSpeedX = undefined;
+                                        ballSpeedY = undefined;
+                                        ballY = NaN;
+                                        ballX = NaN;
+                                    }
+                                } 
+                                // change html attributes for output display
+                                frames.innerHTML = "Frames: " + framesDisplayed;
+                                frameRate.innerHTML = "Framerate: " + Math.round(framesDisplayed/secondsCounted); 
+                                coordinates.innerHTML = "Coordinates: (" + Math.round(ballX) + ", " + Math.round(ballY) + ")";
+                                seconds.innerHTML = "Seconds: " + secondsCounted;
+                                vel.innerHTML = "Velocity: (" + ballSpeedX + ", " + ballSpeedY + ")";
+                                box.onmousemove = findScreenCoords;
+                                framesDisplayed++;
+                            }
+                        }, 1000/window.frameRateDisplayed);
+                    } 
+                });
+                
+        </script>
+    </body>
+</html>
