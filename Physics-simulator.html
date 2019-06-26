@@ -348,10 +348,14 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
                         window.directions.appendChild(directionsText);
                         topDisplay.appendChild(window.directions);
                         // initialize global variables
-                        ballX = 3;
-                        ballY = 3;
-                        ballSpeedX = 1;
-                        ballSpeedY = 2;
+                        let ballCoords = {
+                            ballX: 3,
+                            ballY: 3
+                        }
+                        let ballSpeeds = {
+                            ballSpeedX: 1,
+                            ballSpeedY: 2
+                        }
                         framesDisplayed = 0;
                         secondsCounted = 0;
                         ballSpeed.innerHTML = "Ballspeed: (" + 0 + ", " + 0 + ")";
@@ -371,25 +375,25 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
                             if (!gamePaused) {
                                 window.frameRateDisplayed = myRange.value;
                                 speed.innerHTML = "Frame Rate: " + (window.frameRateDisplayed);
-                                ball.style.marginLeft = ballX + "px";
-                                ball.style.marginTop = ballY + "px";
-                                if (ballY > 484) {
-                                    ballSpeedY *= -1;
+                                ball.style.marginLeft = ballCoords.ballX + "px";
+                                ball.style.marginTop = ballCoords.ballY + "px";
+                                if (ballCoords.ballY > 484) {
+                                    ballSpeeds.ballSpeedY *= -1;
                                 }
-                                if (ballY < 3) {
-                                    ballSpeedY *= -1;
+                                if (ballCoords.ballY < 3) {
+                                    ballSpeeds.ballSpeedY *= -1;
                                 }
-                                if (ballX > 735) {
-                                    ballSpeedX *= -1;
+                                if (ballCoords.ballX > 735) {
+                                    ballSpeeds.ballSpeedX *= -1;
                                 }
-                                if (ballX < 3) {
-                                    ballSpeedX *= -1;
+                                if (ballCoords.ballX < 3) {
+                                    ballSpeeds.ballSpeedX *= -1;
                                 }
                                 // change html attributes for output display 
                                 frames.innerHTML = "Frames: " + framesDisplayed;
                                 frameRate.innerHTML = "Framerate: " + Math.round(framesDisplayed/secondsCounted);
-                                coordinates.innerHTML = "Coordinates: (" + Math.round(ballX) + ", " + Math.round(ballY) + ")";
-                                ballSpeed.innerHTML = "Ballspeed: (" + Math.round(ballSpeedX) + ", " + Math.round(ballSpeedY) + ")";
+                                coordinates.innerHTML = "Coordinates: (" + Math.round(ballCoords.ballX) + ", " + Math.round(ballCoords.ballY) + ")";
+                                ballSpeed.innerHTML = "Ballspeed: (" + Math.round(ballSpeeds.ballSpeedX) + ", " + Math.round(ballSpeeds.ballSpeedY) + ")";
                                 seconds.innerHTML = "Seconds: " + secondsCounted;
                                 // function for repositioning ball via mouse click
                                 box.onmousemove = findScreenCoords;
@@ -408,8 +412,8 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
                                 window.addEventListener('mouseup', function() {
                                     mouseIsDown = false;
                                 }); */
-                                ballX += ballSpeedX;
-                                ballY += ballSpeedY;
+                                ballCoords.ballX += ballSpeeds.ballSpeedX;
+                                ballCoords.ballY += ballSpeeds.ballSpeedY;
                                 framesDisplayed++;
                             }
                         }, 1000/window.frameRateDisplayed);
@@ -450,10 +454,14 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
                         // reinitialize global variables
                         framesDisplayed = 0;
                         secondsCounted = 0;
-                        ballX = 358;
-                        ballY = 232;
-                        ballSpeedY = 0;
-                        ballSpeedX = 0;
+                        let ballCoords = {
+                            ballX: 358,
+                            ballY: 232
+                        }
+                        let ballVelocity = {
+                            ballSpeedX: 0,
+                            ballSpeedY: 0
+                        }
                         let mass = 1;
                         // create interval for loop
                         count = setInterval( function() { secondsCounted++; }, 1000);
@@ -475,72 +483,72 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
                                 ballSizeLabel.innerHTML = "Ball Size (pixels): " + (window.currentBallSize);
                                 ball.style.width = window.currentBallSize + "px";
                                 ball.style.height = window.currentBallSize + "px";
-                                ball.style.marginLeft = ballX + "px";
-                                ball.style.marginTop = ballY + "px";
+                                ball.style.marginLeft = ballCoords.ballX + "px";
+                                ball.style.marginTop = ballCoords.ballY + "px";
 
                                 /* algorithm for changing velocity increments to accomodate for mass */
 
                                 // condtions for X-axis movement
-                                if (ballX > 3 || ballX < 735) {
-                                    if (ballSpeedX/-ballSpeedX === 1) {
-                                        ballX -= ballSpeedX;
+                                if (ballCoords.ballX > 3 || ballCoords.ballX < 735) {
+                                    if (ballVelocity.ballSpeedX/-ballVelocity.ballSpeedX === 1) {
+                                        ballCoords.ballX -= ballVelocity.ballSpeedX;
                                     } else {
-                                        ballX += ballSpeedX;
+                                        ballCoords.ballX += ballVelocity.ballSpeedX;
                                     }
                                 }
-                                if (ballX < 3 && ballSpeedX < 0) {
-                                    ballSpeedX *= -1;
-                                    ballSpeedX -= mass;
+                                if (ballCoords.ballX < 3 && ballVelocity.ballSpeedX < 0) {
+                                    ballVelocity.ballSpeedX *= -1;
+                                    ballVelocity.ballSpeedX -= mass;
                                 }
-                                if (ballX < 1 && ballSpeedX < -6) {
-                                    ballSpeedX *= -1;
-                                    ballSpeedX -= mass;
+                                if (ballCoords.ballX < 1 && ballVelocity.ballSpeedX < -6) {
+                                    ballVelocity.ballSpeedX *= -1;
+                                    ballVelocity.ballSpeedX -= mass;
                                 }
-                                if (ballX < -29 && ballSpeedX >= -6) {
-                                    ballSpeedX *= -1;
-                                    ballSpeedX -= mass;
+                                if (ballCoords.ballX < -29 && ballVelocity.ballSpeedX >= -6) {
+                                    ballVelocity.ballSpeedX *= -1;
+                                    ballVelocity.ballSpeedX -= mass;
                                 }
-                                if (ballX > 735 && ballSpeedX > 0) {
-                                    ballSpeedX *= -1;
-                                    ballSpeedX += mass;
+                                if (ballCoords.ballX > 735 && ballVelocity.ballSpeedX > 0) {
+                                    ballVelocity.ballSpeedX *= -1;
+                                    ballVelocity.ballSpeedX += mass;
                                 }
-                                if (ballX > 737 && ballSpeedX > 6) {
-                                    ballSpeedX *= -1;
-                                    ballSpeedX += mass;
+                                if (ballCoords.ballX > 737 && ballVelocity.ballSpeedX > 6) {
+                                    ballVelocity.ballSpeedX *= -1;
+                                    ballVelocity.ballSpeedX += mass;
                                 }
-                                if (ballX > 767 && ballSpeedX <= 6) {
-                                    ballSpeedX *= -1;
-                                    ballSpeedX += mass;
+                                if (ballCoords.ballX > 767 && ballVelocity.ballSpeedX <= 6) {
+                                    ballVelocity.ballSpeedX *= -1;
+                                    ballVelocity.ballSpeedX += mass;
                                 }
                                 // conditions for Y-axis movement
-                                if (ballY < 486 && ballSpeedY > -6) {
-                                    ballSpeedY += mass;
-                                    ballY += ballSpeedY;
+                                if (ballCoords.ballY < 486 && ballVelocity.ballSpeedY > -6) {
+                                    ballVelocity.ballSpeedY += mass;
+                                    ballCoords.ballY += ballVelocity.ballSpeedY;
                                 }
-                                if (ballY < 516 && ballSpeedY <= -6) {
-                                    ballSpeedY += mass;
-                                    ballY += ballSpeedY;                                   
+                                if (ballCoords.ballY < 516 && ballVelocity.ballSpeedY <= -6) {
+                                    ballVelocity.ballSpeedY += mass;
+                                    ballCoords.ballY += ballVelocity.ballSpeedY;                                   
                                 }
-                                if (ballY > 484 && ballSpeedY > 0) {
-                                    ballSpeedY *= -1;
+                                if (ballCoords.ballY > 484 && ballVelocity.ballSpeedY > 0) {
+                                    ballVelocity.ballSpeedY *= -1;
                                 }
-                                if (ballY < 3 && ballSpeedY > 0) {
-                                    ballSpeedY *= -1;                               
+                                if (ballCoords.ballY < 3 && ballVelocity.ballSpeedY > 0) {
+                                    ballVelocity.ballSpeedY *= -1;                               
                                 }
-                                if (ballY < -29 && ballSpeedY >= 6) {
-                                    ballSpeedY *= -1; 
-                                    ballSpeedY += mass;                                
+                                if (ballCoords.ballY < -29 && ballVelocity.ballSpeedY >= 6) {
+                                    ballVelocity.ballSpeedY *= -1; 
+                                    ballVelocity.ballSpeedY += mass;                                
                                 }
-                                if (ballY < 1 && ballSpeedY < 6) {
-                                    ballSpeedY *= -1;
-                                    ballSpeedY += mass;
+                                if (ballCoords.ballY < 1 && ballVelocity.ballSpeedY < 6) {
+                                    ballVelocity.ballSpeedY *= -1;
+                                    ballVelocity.ballSpeedY += mass;
                                 } 
                                 // change html attributes for output display 
                                 frames.innerHTML = "Frames: " + framesDisplayed;
                                 frameRate.innerHTML = "Framerate: " + Math.round(framesDisplayed/secondsCounted); 
-                                coordinates.innerHTML = "Coordinates: (" + Math.round(ballX) + ", " + Math.round(ballY) + ")";
+                                coordinates.innerHTML = "Coordinates: (" + Math.round(ballCoords.ballX) + ", " + Math.round(ballCoords.ballY) + ")";
                                 seconds.innerHTML = "Seconds: " + secondsCounted;
-                                vel.innerHTML = "Velocity: (" + ballSpeedX + ", " + ballSpeedY + ")";
+                                vel.innerHTML = "Velocity: (" + ballVelocity.ballSpeedX + ", " + ballVelocity.ballSpeedY + ")";
                                 // function for repositioning ball and changing its velocity via clicking and dragging the mouse
                                 box.onmousemove = findScreenCoords;
                                 box.addEventListener('mousedown', (e) => {
@@ -549,18 +557,18 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
                                     mouseIsDown = true;
                                     setInterval(function() {
                                         if(mouseIsDown) {
-                                            ballX = truexpos;
-                                            ballY = trueypos;
-                                            ballSpeedY = 0;
+                                            ballCoords.ballX = truexpos;
+                                            ballCoords.ballY = trueypos;
+                                            ballVelocity.ballSpeedY = 0;
                                             coordArrayX.push(truexpos);
                                             coordArrayY.push(trueypos);
                                             if (coordArrayX.length === 10 || coordArrayY.length === 5) {
                                                 let xOne = coordArrayX[0];
                                                 let xTwo = coordArrayX[coordArrayX.length-1];
-                                                ballSpeedX = Math.round((xTwo - xOne)/16);
+                                                ballVelocity.ballSpeedX = Math.round((xTwo - xOne)/16);
                                                 let yOne = coordArrayY[0];
                                                 let yTwo = coordArrayY[coordArrayY.length-1];
-                                                ballSpeedY = Math.abs(Math.round((yTwo - yOne)/16));
+                                                ballVelocity.ballSpeedY = Math.abs(Math.round((yTwo - yOne)/16));
                                                 coordArrayX = [];
                                                 coordArrayY = [];
                                             }
@@ -583,8 +591,10 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
                             ballSpeedExists = true;
                         }        
                         // reinitialize globals and call createPlanets function
-                        ballX = 358;
-                        ballY = 232;
+                        let ballCoords = {
+                            ballX: 358,
+                            ballY: 232
+                        }
                         createPlanets();
                         planetsExist = true;
                         // remove directions
@@ -600,15 +610,23 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
                         window.directions = document.createElement('p');
                         const directionsText = document.createTextNode('Directions: N/A');
                         window.directions.appendChild(directionsText);
-                        topDisplay.appendChild(window.directions);                                 
-                        ballSpeedX = 0;
-                        ballSpeedY = 0;
-                        let planetOneX; // 358
-                        let planetOneY; // 36
-                        let planetTwoX; // 308
-                        let planetTwoY; // 74
-                        let planetThreeX;
-                        let planetThreeY;
+                        topDisplay.appendChild(window.directions);   
+                        let ballSpeeds = {
+                            ballSpeedX: 0,
+                            ballSpeedY: 0
+                        }      
+                        let planetOneCoordss = {
+                            planetOneX: null,
+                            planetOneY: null
+                        }       
+                        let planetTwoCoordss = {
+                            planetTwoX: null,
+                            planetTwoY: null
+                        }       
+                        let planetThreeCoordss = {
+                            planetThreeX: null,
+                            planetThreeY: null
+                        } 
                         let theta = Math.PI/2;
                         let beta = 2*Math.PI/3;
                         let alpha = 0.01745329252;
@@ -618,10 +636,10 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
                                 theta = 2*Math.PI;
                             }
                             theta -= 0.01745329252;
-                            planetOneX = radius*Math.cos(theta)+358;
-                            planetOneY = radius*Math.sin(theta)-17;
-                            planetOne.style.marginLeft = planetOneX + "px";
-                            planetOne.style.marginTop = planetOneY + "px";
+                            planetOneCoordss.planetOneX = radius*Math.cos(theta)+358;
+                            planetOneCoordss.planetOneY = radius*Math.sin(theta)-17;
+                            planetOne.style.marginLeft = planetOneCoordss.planetOneX + "px";
+                            planetOne.style.marginTop = planetOneCoordss.planetOneY + "px";
                         } 
                         // function for planetTwo orbit parameters
                         function planetTwoOrbitParam(radius) {
@@ -629,10 +647,10 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
                                 beta = 2*Math.PI;
                             }
                             beta -= 0.01745329252;
-                            planetTwoX = radius*Math.cos(beta)+358;
-                            planetTwoY = radius*Math.sin(beta)-17;          
-                            planetTwo.style.marginLeft = planetTwoX + "px";
-                            planetTwo.style.marginTop = planetTwoY + "px";
+                            planetTwoCoordss.planetTwoX = radius*Math.cos(beta)+358;
+                            planetTwoCoordss.planetTwoY = radius*Math.sin(beta)-17;          
+                            planetTwo.style.marginLeft = planetTwoCoordss.planetTwoX + "px";
+                            planetTwo.style.marginTop = planetTwoCoordss.planetTwoY + "px";
                         }
                         // function for planetThree orbit parameters
                         function planetThreeOrbitParam(radius) {
@@ -640,10 +658,10 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
                                 alpha = 2*Math.PI;
                             }
                             alpha -= 0.01745329252;
-                            planetThreeX = radius*Math.cos(alpha)+358;
-                            planetThreeY = radius*Math.sin(alpha)-17;          
-                            planetThree.style.marginLeft = planetThreeX + "px";
-                            planetThree.style.marginTop = planetThreeY + "px";
+                            planetThreeCoordss.planetThreeX = radius*Math.cos(alpha)+358;
+                            planetThreeCoordss.planetThreeY = radius*Math.sin(alpha)-17;          
+                            planetThree.style.marginLeft = planetThreeCoordss.planetThreeX + "px";
+                            planetThree.style.marginTop = planetThreeCoordss.planetThreeY + "px";
                         }
                         framesDisplayed = 0;
                         secondsCounted = 0;
@@ -670,9 +688,9 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
                                 // change html attributes for output display 
                                 frames.innerHTML = "Frames: " + framesDisplayed;
                                 frameRate.innerHTML = "Framerate: " + Math.round(framesDisplayed/secondsCounted);
-                                planetOneCoords.innerHTML = "Planet One Coordinates: (" + Math.round(planetOneX) + ", " + Math.round(planetOneY) + ")";
-                                planetTwoCoords.innerHTML = "Planet Two Coordinates: (" + Math.round(planetTwoX) + ", " + Math.round(planetTwoY) + ")";
-                                planetThreeCoords.innerHTML = "Planet Three Coordinates: (" + Math.round(planetThreeX) + ", " + Math.round(planetThreeY) + ")";
+                                planetOneCoords.innerHTML = "Planet One Coordinates: (" + Math.round(planetOneCoordss.planetOneX) + ", " + Math.round(planetOneCoordss.planetOneY) + ")";
+                                planetTwoCoords.innerHTML = "Planet Two Coordinates: (" + Math.round(planetTwoCoordss.planetTwoX) + ", " + Math.round(planetTwoCoordss.planetTwoY) + ")";
+                                planetThreeCoords.innerHTML = "Planet Three Coordinates: (" + Math.round(planetThreeCoordss.planetThreeX) + ", " + Math.round(planetThreeCoordss.planetThreeY) + ")";
                                 seconds.innerHTML = "Seconds: " + secondsCounted;
                                 box.onmousemove = findScreenCoords;
                                 framesDisplayed++;
@@ -725,10 +743,14 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
                         let mass = 1;
                         let theta  = -45;
                         let secondsExisted;
-                        let ballSpeedX;
-                        let ballSpeedY;
-                        let ballY;
-                        let ballX;
+                        let ballSpeeds = {
+                            ballSpeedX: null,
+                            ballSpeedY: null
+                        }
+                        let ballCoords = {
+                            ballX: null,
+                            ballY: null
+                        }
                         // set local to global 
                         window.ball;
                         // create interval for loop
@@ -777,157 +799,157 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
                                         }
                                         // several if conditions for ball accuracy
                                         if (theta >= -105.301 && theta <= -94.401) {
-                                            ballX = 12;
-                                            ballY = 447;
-                                            window.ball.style.marginLeft = ballX + 'px';
-                                            window.ball.style.marginTop = ballY + 'px';
-                                            ballSpeedX = -10;
-                                            ballSpeedY = -30;
+                                            ballCoords.ballX = 12;
+                                            ballCoords.ballY = 447;
+                                            window.ball.style.marginLeft = ballCoords.ballX + 'px';
+                                            window.ball.style.marginTop = ballCoords.ballY + 'px';
+                                            ballSpeeds.ballSpeedX = -10;
+                                            ballSpeeds.ballSpeedY = -30;
                                         }
                                         if (theta >= -94.401 && theta <= -83.501) {
-                                            ballX = 16;
-                                            ballY = 447;  
-                                            window.ball.style.marginLeft = ballX + 'px';
-                                            window.ball.style.marginTop = ballY + 'px'; 
-                                            ballSpeedX = 0;
-                                            ballSpeedY = -30;                                         
+                                            ballCoords.ballX = 16;
+                                            ballCoords.ballY = 447;  
+                                            window.ball.style.marginLeft = ballCoords.ballX + 'px';
+                                            window.ball.style.marginTop = ballCoords.ballY + 'px'; 
+                                            ballSpeeds.ballSpeedX = 0;
+                                            ballSpeeds.ballSpeedY = -30;                                         
                                         }
                                         if (theta >= -83.501 && theta <= -72.601) {
-                                            ballX = 18;
-                                            ballY = 447;
-                                            window.ball.style.marginLeft = ballX + 'px';
-                                            window.ball.style.marginTop = ballY + 'px';
-                                            ballSpeedX = 10;
-                                            ballSpeedY = -30;
+                                            ballCoords.ballX = 18;
+                                            ballCoords.ballY = 447;
+                                            window.ball.style.marginLeft = ballCoords.ballX + 'px';
+                                            window.ball.style.marginTop = ballCoords.ballY + 'px';
+                                            ballSpeeds.ballSpeedX = 10;
+                                            ballSpeeds.ballSpeedY = -30;
                                         }
                                         if (theta >= -72.601 && theta <= -61.701) {
-                                            ballX = 23;
-                                            ballY = 448;
-                                            window.ball.style.marginLeft = ballX + 'px';
-                                            window.ball.style.marginTop = ballY + 'px';
-                                            ballSpeedX = 15;
-                                            ballSpeedY = -30;
+                                            ballCoords.ballX = 23;
+                                            ballCoords.ballY = 448;
+                                            window.ball.style.marginLeft = ballCoords.ballX + 'px';
+                                            window.ball.style.marginTop = ballCoords.ballY + 'px';
+                                            ballSpeeds.ballSpeedX = 15;
+                                            ballSpeeds.ballSpeedY = -30;
                                         }
                                         if (theta >= -61.701 && theta <= -50.801) {
-                                            ballX = 26;
-                                            ballY = 450;
-                                            window.ball.style.marginLeft = ballX + 'px';
-                                            window.ball.style.marginTop = ballY + 'px';
-                                            ballSpeedX = 20;
-                                            ballSpeedY = -25;
+                                            ballCoords.ballX = 26;
+                                            ballCoords.ballY = 450;
+                                            window.ball.style.marginLeft = ballCoords.ballX + 'px';
+                                            window.ball.style.marginTop = ballCoords.ballY + 'px';
+                                            ballSpeeds.ballSpeedX = 20;
+                                            ballSpeeds.ballSpeedY = -25;
                                         }
                                         if (theta >= -50.801 && theta <= -39.901) {
-                                            ballX = 31;
-                                            ballY = 452;
-                                            window.ball.style.marginLeft = ballX + 'px';
-                                            window.ball.style.marginTop = ballY + 'px';
-                                            ballSpeedX = 25;
-                                            ballSpeedY = -25;
+                                            ballCoords.ballX = 31;
+                                            ballCoords.ballY = 452;
+                                            window.ball.style.marginLeft = ballCoords.ballX + 'px';
+                                            window.ball.style.marginTop = ballCoords.ballY + 'px';
+                                            ballSpeeds.ballSpeedX = 25;
+                                            ballSpeeds.ballSpeedY = -25;
                                         }
                                         if (theta >= -39.901 && theta <= -29.001) {
-                                            ballX = 33;
-                                            ballY = 455;
-                                            window.ball.style.marginLeft = ballX + 'px';
-                                            window.ball.style.marginTop = ballY + 'px';
-                                            ballSpeedX = 25;
-                                            ballSpeedY = -20;
+                                            ballCoords.ballX = 33;
+                                            ballCoords.ballY = 455;
+                                            window.ball.style.marginLeft = ballCoords.ballX + 'px';
+                                            window.ball.style.marginTop = ballCoords.ballY + 'px';
+                                            ballSpeeds.ballSpeedX = 25;
+                                            ballSpeeds.ballSpeedY = -20;
                                         }
                                         if (theta >= -29.001 && theta <= -18.101) {
-                                            ballX = 35;
-                                            ballY = 458;
-                                            window.ball.style.marginLeft = ballX + 'px';
-                                            window.ball.style.marginTop = ballY + 'px';
-                                            ballSpeedX = 30;
-                                            ballSpeedY = -15;
+                                            ballCoords.ballX = 35;
+                                            ballCoords.ballY = 458;
+                                            window.ball.style.marginLeft = ballCoords.ballX + 'px';
+                                            window.ball.style.marginTop = ballCoords.ballY + 'px';
+                                            ballSpeeds.ballSpeedX = 30;
+                                            ballSpeeds.ballSpeedY = -15;
                                         }
                                         if (theta >= -18.101 && theta <= -7.201) {
-                                            ballX = 37;
-                                            ballY = 462;
-                                            window.ball.style.marginLeft = ballX + 'px';
-                                            window.ball.style.marginTop = ballY + 'px';
-                                            ballSpeedX = 35;
-                                            ballSpeedY = -10;
+                                            ballCoords.ballX = 37;
+                                            ballCoords.ballY = 462;
+                                            window.ball.style.marginLeft = ballCoords.ballX + 'px';
+                                            window.ball.style.marginTop = ballCoords.ballY + 'px';
+                                            ballSpeeds.ballSpeedX = 35;
+                                            ballSpeeds.ballSpeedY = -10;
                                         }
                                         if (theta >= -7.201 && theta <= 3.699) {
-                                            ballX = 39;
-                                            ballY = 469;
-                                            window.ball.style.marginLeft = ballX + 'px';
-                                            window.ball.style.marginTop = ballY + 'px';
-                                            ballSpeedX = 30;
-                                            ballSpeedY = -5;
+                                            ballCoords.ballX = 39;
+                                            ballCoords.ballY = 469;
+                                            window.ball.style.marginLeft = ballCoords.ballX + 'px';
+                                            window.ball.style.marginTop = ballCoords.ballY + 'px';
+                                            ballSpeeds.ballSpeedX = 30;
+                                            ballSpeeds.ballSpeedY = -5;
                                         }
                                         if (theta >= 3.699 && theta <= 14.599) {
-                                            ballX = 38;
-                                            ballY = 472;
-                                            window.ball.style.marginLeft = ballX + 'px';
-                                            window.ball.style.marginTop = ballY + 'px';
-                                            ballSpeedX = 30;
-                                            ballSpeedY = 5;
+                                            ballCoords.ballX = 38;
+                                            ballCoords.ballY = 472;
+                                            window.ball.style.marginLeft = ballCoords.ballX + 'px';
+                                            window.ball.style.marginTop = ballCoords.ballY + 'px';
+                                            ballSpeeds.ballSpeedX = 30;
+                                            ballSpeeds.ballSpeedY = 5;
                                         }
                                     }
                                 });
                                 // update ball position 
                                 if (ballExists) {
-                                    window.ball.style.marginLeft = ballX + "px";
-                                    window.ball.style.marginTop = ballY + "px";
+                                    window.ball.style.marginLeft = ballCoords.ballX + "px";
+                                    window.ball.style.marginTop = ballCoords.ballY + "px";
                                 }
 
                                 /* algorithm for changing velocity increments to accomodate for mass */
 
                                 // change velocity increments to accomodate for mass
-                                if (ballX > 3 || ballX < 735) {
-                                    if (ballSpeedX/-ballSpeedX === 1) {
-                                        ballX -= ballSpeedX;
+                                if (ballCoords.ballX > 3 || ballCoords.ballX < 735) {
+                                    if (ballSpeeds.ballSpeedX/-ballSpeeds.ballSpeedX === 1) {
+                                        ballCoords.ballX -= ballSpeeds.ballSpeedX;
                                     } else {
-                                        ballX += ballSpeedX;
+                                        ballCoords.ballX += ballSpeeds.ballSpeedX;
                                     }
                                 }
-                                if (ballX < 3 && ballSpeedX < 0) {
-                                    ballSpeedX *= -1;
-                                    ballSpeedX -= mass;
+                                if (ballCoords.ballX < 3 && ballSpeeds.ballSpeedX < 0) {
+                                    ballSpeeds.ballSpeedX *= -1;
+                                    ballSpeeds.ballSpeedX -= mass;
                                 }
-                                if (ballX < 1 && ballSpeedX < -6) {
-                                    ballSpeedX *= -1;
-                                    ballSpeedX -= mass;
+                                if (ballCoords.ballX < 1 && ballSpeeds.ballSpeedX < -6) {
+                                    ballSpeeds.ballSpeedX *= -1;
+                                    ballSpeeds.ballSpeedX -= mass;
                                 }
-                                if (ballX < -29 && ballSpeedX >= -6) {
-                                    ballSpeedX *= -1;
-                                    ballSpeedX -= mass;
+                                if (ballCoords.ballX < -29 && ballSpeeds.ballSpeedX >= -6) {
+                                    ballSpeeds.ballSpeedX *= -1;
+                                    ballSpeeds.ballSpeedX -= mass;
                                 }
-                                if (ballX > 735 && ballSpeedX > 0) {
-                                    ballSpeedX *= -1;
-                                    ballSpeedX += mass;
+                                if (ballCoords.ballX > 735 && ballSpeeds.ballSpeedX > 0) {
+                                    ballSpeeds.ballSpeedX *= -1;
+                                    ballSpeeds.ballSpeedX += mass;
                                 }
-                                if (ballX > 737 && ballSpeedX > 6) {
-                                    ballSpeedX *= -1;
-                                    ballSpeedX += mass;
+                                if (ballCoords.ballX > 737 && ballSpeeds.ballSpeedX > 6) {
+                                    ballSpeeds.ballSpeedX *= -1;
+                                    ballSpeeds.ballSpeedX += mass;
                                 }
-                                if (ballX > 767 && ballSpeedX <= 6) {
-                                    ballSpeedX *= -1;
-                                    ballSpeedX += mass;
+                                if (ballCoords.ballX > 767 && ballSpeeds.ballSpeedX <= 6) {
+                                    ballSpeeds.ballSpeedX *= -1;
+                                    ballSpeeds.ballSpeedX += mass;
                                 }
                                 // conditions for Y-axis movement
-                                if (ballY < 486 && ballSpeedY > -6) {
-                                    ballSpeedY += mass;
-                                    ballY += ballSpeedY;
+                                if (ballCoords.ballY < 486 && ballSpeeds.ballSpeedY > -6) {
+                                    ballSpeeds.ballSpeedY += mass;
+                                    ballCoords.ballY += ballSpeeds.ballSpeedY;
                                 }
-                                if (ballY < 516 && ballSpeedY <= -6) {
-                                    ballSpeedY += mass;
-                                    ballY += ballSpeedY;                                   
+                                if (ballCoords.ballY < 516 && ballSpeeds.ballSpeedY <= -6) {
+                                    ballSpeeds.ballSpeedY += mass;
+                                    ballCoords.ballY += ballSpeeds.ballSpeedY;                                   
                                 }
-                                if (ballY > 484 && ballSpeedY > 0) {
-                                    ballSpeedY *= -1;
+                                if (ballCoords.ballY > 484 && ballSpeeds.ballSpeedY > 0) {
+                                    ballSpeeds.ballSpeedY *= -1;
                                 }
-                                if (ballY < 3 && ballSpeedY > 0) {
-                                    ballSpeedY *= -1;                               
+                                if (ballCoords.ballY < 3 && ballSpeeds.ballSpeedY > 0) {
+                                    ballSpeeds.ballSpeedY *= -1;                               
                                 }
-                                if (ballY < -29 && ballSpeedY >= 6) {
-                                    ballSpeedY *= -1; 
-                                    ballSpeedY += mass;                                
+                                if (ballCoords.ballY < -29 && ballSpeeds.ballSpeedY >= 6) {
+                                    ballSpeeds.ballSpeedY *= -1; 
+                                    ballSpeeds.ballSpeedY += mass;                                
                                 }
-                                if (ballY < 1 && ballSpeedY < 6) {
-                                    ballSpeedY *= -1;
-                                    ballSpeedY += mass;
+                                if (ballCoords.ballY < 1 && ballSpeeds.ballSpeedY < 6) {
+                                    ballSpeeds.ballSpeedY *= -1;
+                                    ballSpeeds.ballSpeedY += mass;
                                 }
                                 // check if ball existed more than 5 seconds
                                 if (secondsExisted < secondsCounted) {
@@ -935,18 +957,18 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
                                         window.ball.parentElement.removeChild(window.ball);
                                         ballExists = false;
                                         // reinitialize ball attributes
-                                        ballSpeedX = undefined;
-                                        ballSpeedY = undefined;
-                                        ballY = NaN;
-                                        ballX = NaN;
+                                        ballSpeeds.ballSpeedX = undefined;
+                                        ballSpeeds.ballSpeedY = undefined;
+                                        ballCoords.ballY = NaN;
+                                        ballCoords.ballX = NaN;
                                     }
                                 } 
                                 // change html attributes for output display
                                 frames.innerHTML = "Frames: " + framesDisplayed;
                                 frameRate.innerHTML = "Framerate: " + Math.round(framesDisplayed/secondsCounted); 
-                                coordinates.innerHTML = "Coordinates: (" + Math.round(ballX) + ", " + Math.round(ballY) + ")";
+                                coordinates.innerHTML = "Coordinates: (" + Math.round(ballCoords.ballX) + ", " + Math.round(ballCoords.ballY) + ")";
                                 seconds.innerHTML = "Seconds: " + secondsCounted;
-                                vel.innerHTML = "Velocity: (" + ballSpeedX + ", " + ballSpeedY + ")";
+                                vel.innerHTML = "Velocity: (" + ballSpeeds.ballSpeedX + ", " + ballSpeeds.ballSpeedY + ")";
                                 box.onmousemove = findScreenCoords;
                                 framesDisplayed++;
                             }
