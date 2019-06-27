@@ -121,11 +121,11 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
             </div>
         </div>
         <script>
+
             /******************
                  Variables     
             *******************/
 
-            // getters and setters 
             const topDisplay = document.querySelector("div.topDisplay");
             const rightDisplay = document.querySelector("div.rightDisplay");
             const box = document.querySelector("div.Box");
@@ -187,17 +187,21 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
             function findScreenCoords(mouseEvent) {
                 let xpos;
                 let ypos;
+                let mouseCoords = {
+                    xpos: null,
+                    ypos: null
+                }
                 if (mouseEvent) {
                     //FireFox
-                    xpos = mouseEvent.screenX;
-                    ypos = mouseEvent.screenY;
+                    mouseCoords.xpos = mouseEvent.screenX;
+                    mouseCoords.ypos = mouseEvent.screenY;
                 } else {
                     //IE
-                    xpos = window.event.screenX;
-                    ypos = window.event.screenY;
+                    mouseCoords.xpos = window.event.screenX;
+                    mouseCoords.ypos = window.event.screenY;
                 }
-                truexpos = xpos-16;
-                trueypos = ypos-86;
+                truexpos = mouseCoords.xpos-16;
+                trueypos = mouseCoords.ypos-86;
                 document.getElementById("screenCoords").innerHTML = "Mouse coordinates: (" + truexpos + ", " + trueypos + ")";
             }
 
@@ -274,37 +278,57 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
             }
 
             // sets planet attributes
-            function planetStyleEditor(planet, color, marginLeft, marginTop) {
-                planet.style.backgroundColor = color;
-                planet.style.width = '16px';
-                planet.style.height = '16px';
-                planet.style.marginLeft = marginLeft;
-                planet.style.marginTop = marginTop;
-                planet.style.borderRadius = '50%';
+            class Planet {
+                constructor(color, marginLeft, marginTop) {
+                    this.backgroundColor = color,
+                    this.width = '16px',
+                    this.height = '16px',
+                    this.marginLeft = marginLeft,
+                    this.marginTop = marginTop,
+                    this.borderRadius = '50%'
+                }
             }
 
             // create planets when solar system is selected
             function createPlanets() {
-                const planetOne = document.createElement('div');
+                let planetOne = document.createElement('div');
                 planetOne.id = 'planetOne';
                 box.appendChild(planetOne);
-                planetStyleEditor(planetOne, 'red', '358px', '36px'); 
+                let planetOneProps = new Planet('red', '358px', '36px');
+                planetOne.style.backgroundColor = planetOneProps.backgroundColor;
+                planetOne.style.width = planetOneProps.width;
+                planetOne.style.height = planetOneProps.height;
+                planetOne.style.marginLeft = planetOneProps.marginLeft;
+                planetOne.style.marginTop = planetOneProps.marginTop;
+                planetOne.style.borderRadius = planetOneProps.borderRadius;
                 planetOneCoords = document.createElement("p");
                 let planetOneCoordsText = document.createTextNode("Planet One Coordinates: ");
                 planetOneCoords.appendChild(planetOneCoordsText);   
                 topDisplay.appendChild(planetOneCoords);
-                const planetTwo = document.createElement('div');
+                planetTwo = document.createElement('div');
                 planetTwo.id = 'planetTwo';
                 box.appendChild(planetTwo);
-                planetStyleEditor(planetTwo, 'blue', '358px', '36px');
+                let planetTwoProps = new Planet('blue', '358px', '36px');
+                planetTwo.style.backgroundColor = planetTwoProps.backgroundColor;
+                planetTwo.style.width = planetTwoProps.width;
+                planetTwo.style.height = planetTwoProps.height;
+                planetTwo.style.marginLeft = planetTwoProps.marginLeft;
+                planetTwo.style.marginTop = planetTwoProps.marginTop;
+                planetTwo.style.borderRadius = planetTwoProps.borderRadius;
                 planetTwoCoords = document.createElement("p");
                 let planetTwoCoordsText = document.createTextNode("Planet Two Coordinates: ");
                 planetTwoCoords.appendChild(planetTwoCoordsText);   
                 topDisplay.appendChild(planetTwoCoords);
-                const planetThree = document.createElement('div');
+                let planetThree = document.createElement('div');
                 planetThree.id = 'planetThree';
                 box.appendChild(planetThree);
-                planetStyleEditor(planetThree, 'green', '358px', '52px');
+                let planetThreeProps = new Planet('green', '358px', '36px');
+                planetThree.style.backgroundColor = planetThreeProps.backgroundColor;
+                planetThree.style.width = planetThreeProps.width;
+                planetThree.style.height = planetThreeProps.height;
+                planetThree.style.marginLeft = planetThreeProps.marginLeft;
+                planetThree.style.marginTop = planetThreeProps.marginTop;
+                planetThree.style.borderRadius = planetThreeProps.borderRadius;
                 planetThreeCoords = document.createElement("p");
                 let planetThreeCoordsText = document.createTextNode("Planet Three Coordinates: ");
                 planetThreeCoords.appendChild(planetThreeCoordsText);   
