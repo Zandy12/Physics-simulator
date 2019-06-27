@@ -425,11 +425,11 @@ Youtube: https://www.youtube.com/ channel/UC7FQiD7YCx1xTsF3arAYohw/
                                     mouseIsDown = true;
                                     setInterval(function() {
                                         if(mouseIsDown) {
-                                            ballX = truexpos;
-                                            ballY = trueypos;
+                                            ballCoords.ballX = truexpos;
+                                            ballCoords.ballY = trueypos;
                                         }
-                                        if (ballSpeedY === -2) {
-                                            ballSpeedY = 2;
+                                        if (ballSpeeds.ballSpeedY === -2) {
+                                            ballSpeeds.ballSpeedY = 2;
                                         }
                                     }, 1000/window.frameRateDisplayed);
                                 });
